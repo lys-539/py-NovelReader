@@ -1,0 +1,39 @@
+# 忽略所有文件
+*
+
+# 但不忽略以下文件和目录
+!.gitignore
+!main.py
+!cli.py
+!calculate_string_length.py
+!calculate_string_length_const.py
+
+# Python 缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 测试和临时文件
+test.py
+*.backup
+*.txt
+*.spec
+*.bat
+
+# 配置和历史文件
+config.json
+history.json
