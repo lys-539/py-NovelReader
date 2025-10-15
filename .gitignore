@@ -3,6 +3,8 @@
 
 # 但不忽略以下文件和目录
 !.gitignore
+!README.md
+#!requirements.txt
 !main.py
 !cli.py
 !calculate_string_length.py
