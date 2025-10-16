@@ -67,7 +67,7 @@ class ReaderCLI:
                 if self.CurrentFile:
                     if len(self.CurrentFilePoss) > 1:
                         self.CurrentFilePoss = self.CurrentFilePoss[:-1]
-                    self._update_next_file_content()
+                    self._try_update_file_content()
                 os.system('cls')
                 self.draw()
             time.sleep(0.5)  # 增加检查间隔，减少CPU占用
@@ -265,6 +265,29 @@ class ReaderCLI:
                 except:
                     return 0
         return 1
+    
+    def _try_update_file_content(self) -> bool:
+        try:
+            self._update_next_file_content()
+            return 1
+        except EOFError:
+            self.CurrentFileDisplayContent.append('\033[31m' + Cut_And_Pad_String(' <已到达文件末尾>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m')
+            return 1
+        except:
+            status_ = self._try_open_file(self.CurrentFileEncoding)
+            if status_ == -1:
+                self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <无法打开文件>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
+                self.CurrentFile = None
+                self.CurrentFileEncoding = ''
+                return 1
+            elif status_ in [0, 2]:
+                # 如果仍然失败，尝试用 latin-1 打开（能处理所有字节）
+                self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <不支持的编码格式>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
+                self.CurrentFile = None
+                self.CurrentFileEncoding = ''
+                return 1
+        return 0
+
 
     def run(self) -> None:
         threading.Thread(target=self._listen_terminal_size, daemon=True).start()
@@ -335,25 +358,8 @@ class ReaderCLI:
                             self.CurrentFileEncoding = ''
                         self._get_file_pos_history()
                         while True:
-                            try:
-                                self._update_next_file_content()
+                            if self._try_update_file_content():
                                 break
-                            except EOFError:
-                                self.CurrentFileDisplayContent.append('\033[31m' + Cut_And_Pad_String(' <已到达文件末尾>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m')
-                                break
-                            except:
-                                status_ = self._try_open_file(self.CurrentFileEncoding)
-                                if status_ == -1:
-                                    self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <无法打开文件>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
-                                    self.CurrentFile = None
-                                    self.CurrentFileEncoding = ''
-                                    break
-                                elif status_ in [0, 2]:
-                                    # 如果仍然失败，尝试用 latin-1 打开（能处理所有字节）
-                                    self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <不支持的编码格式>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
-                                    self.CurrentFile = None
-                                    self.CurrentFileEncoding = ''
-                                    break
                     self.draw()  # 目录切换时清屏
                 elif key in ['TAB']:
                     self.read_file_page()  # 切换到文件阅读页面
@@ -381,45 +387,13 @@ class ReaderCLI:
                     else:
                         self.CurrentFilePoss = [0]
                     while True:
-                        try:
-                            self._update_next_file_content()
+                        if self._try_update_file_content():
                             break
-                        except EOFError:
-                            self.CurrentFileDisplayContent.append('\033[31m' + Cut_And_Pad_String(' <已到达文件末尾>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m')
-                            break
-                        except:
-                            status_ = self._try_open_file(self.CurrentFileEncoding)
-                            if status_ == -1:
-                                self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <无法打开文件>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
-                                self.CurrentFile = None
-                                self.CurrentFileEncoding = ''
-                                break
-                            elif status_ in [0, 2]:
-                                # 如果仍然失败，尝试用 latin-1 打开（能处理所有字节）
-                                self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <不支持的编码格式>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
-                                self.CurrentFile = None
-                                self.CurrentFileEncoding = ''
-                                break
                     self.draw()
                 elif key in ['DOWN']:
                     while True:
-                        try:
-                            self._update_next_file_content()
+                        if self._try_update_file_content():
                             break
-                        except EOFError:
-                            self.CurrentFileDisplayContent.append('\033[31m' + Cut_And_Pad_String(' <已到达文件末尾>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m')
-                            break
-                        except:
-                            status_ = self._try_open_file(self.CurrentFileEncoding)
-                            if status_ == -1:
-                                self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <无法打开文件>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
-                                self.CurrentFile = None
-                                self.CurrentFileEncoding = ''
-                            elif status_ in [0, 2]:
-                                # 如果仍然失败，尝试用 latin-1 打开（能处理所有字节）
-                                self.CurrentFileDisplayContent = ['\033[31m' + Cut_And_Pad_String(' <不支持的编码格式>', self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ') + '\033[0m']
-                                self.CurrentFile = None
-                                self.CurrentFileEncoding = ''
                     self.draw()
             else:
                 time.sleep(0.01)  # 添加短暂延迟，避免CPU空转
