@@ -67,9 +67,11 @@ def Calc_Char_Width(char:str) -> Literal[0, 1, 2]:
     """
     Calculate the width of a character.
     """
-    if char in ['‘', '’', '“', '”', '…', '·', '—'
-                , '《' , '》', '↑', '↓', '←', '→']:
+    if (ord(char) >= 0xFF00 and ord(char) <= 0xFFEF) or char in['‘', '’', '“', '”', '…', '·', '—'
+                                                                , '《' , '》', '↑', '↓', '←', '→']:
         return 2
+    #elif char in ['\t']:
+    #    return 4
     width = _wcwidth(char)
     if width < 0:
         return 0

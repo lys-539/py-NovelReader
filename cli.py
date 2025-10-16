@@ -95,7 +95,10 @@ class ReaderCLI:
                     key = 'RIGHT'
                 else:
                     continue  # 使用 continue 而不是 return
-            self.KeyQueue.append(key)
+            if not self.KeyQueue:
+                self.KeyQueue.append(key)
+            elif key != self.KeyQueue[-1]:
+                self.KeyQueue = [key]
             #time.sleep(0.1)  # 设置最小间隔
 
     def draw(self) -> None:
@@ -212,13 +215,15 @@ class ReaderCLI:
                 while Calc_String_Width(__) < self.RightWidth - 1:
                     while True:
                         char = self.CurrentFile.read(1)
-                        if not char:
+                        if char == '\t':
+                            char = '    '
+                        elif not char:
                             if len(self.CurrentFilePoss) > 1 and self.CurrentFilePoss[-1] != self.CurrentFilePoss[-2]:
                                 self.CurrentFilePoss.append(self.CurrentFilePoss[-1])
                             raise EOFError
-                        if char != '\r' or not char:
+                        elif char != '\r':
                             break
-                    if char == '\n' or not char:
+                    if char == '\n':
                         break
                     __ += char
                 if Calc_String_Width(__) > self.RightWidth - 1:
@@ -268,6 +273,7 @@ class ReaderCLI:
         self._load_directory(self.CurrentDir)
         while self.LoopFlag:
             self.select_file_page()
+        os.system('cls')
 
     def select_file_page(self) -> None:
         self.CurrentPage = 'file_select'
