@@ -220,6 +220,8 @@ class ReaderCLI:
                         elif not char:
                             if len(self.CurrentFilePoss) > 1 and self.CurrentFilePoss[-1] != self.CurrentFilePoss[-2]:
                                 self.CurrentFilePoss.append(self.CurrentFilePoss[-1])
+                            __ = Cut_And_Pad_String(__, self.RightWidth - 1, cut_align='right', pad_align='right', pad_char=' ')
+                            self.CurrentFileDisplayContent.append(__)
                             raise EOFError
                         elif char != '\r':
                             break
